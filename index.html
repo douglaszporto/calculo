@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+	<head>
+		<title>Animação e equação do sistema Massa-Mola</title>
+		<script src="equacao.js"></script>
+		<script src="graficos.js"></script>
+		<script>
+			var eq = '0';
+			var m=0;
+			var c=0;
+			var k=0;
+			var p=0;
+			var v=0;
+			var s=0;
+			var w=0;
+			var s2=0;
+			var w2=0;
+			function Inicia(){
+				Equacao.definePrecisao(2);
+				Equacao.montaValoresEquacao('Math.pow(x,2)',0,1); 
+				Equacao.defineEscalaVertical(1);
+				Equacao.defineEscalaHorizontal(1);
+				Graficos.MostraBorda();
+				Graficos.CalculaLinhas();
+				Graficos.MostraTetoAnimacao();
+				Graficos.AnimaMola(215);
+				Graficos.AnimaMassa(92,275);
+			}
+			function FuncaoReal(){
+				
+				
+				m  = parseFloat(document.getElementById("massa").value);
+				m2 = Math.pow(m,2);
+				c  = parseFloat(document.getElementById("amortecimento").value);
+				c2 = Math.pow(c,2);
+				k  = parseFloat(document.getElementById("mola").value);
+				p  = parseFloat(document.getElementById("posIni").value);
+				v  = parseFloat(document.getElementById("velIni").value);
+				v  = 0;
+				f  = parseFloat(document.getElementById("forca").value);
+				s  = c/(2*m);
+				s2 = Math.pow(s,2);
+				w02= k/m;
+				w0 = Math.sqrt(w02);
+				w  = parseFloat(document.getElementById("omegaZero").value);
+				w2 = Math.pow(w,2);
+				n  = 0;
+				
+				l_min = parseInt(document.getElementById("l_min").value);
+				l_max = parseInt(document.getElementById("l_max").value);
+				prec  = parseInt(document.getElementById("prec").value);
+				
+				Graficos.definicoesIniciais();
+				Equacao.dificicoesIniciais();
+				Equacao.definePrecisao(prec);
+				
+				if(p>0){
+					Equacao.defineEscalaVertical(parseInt(p/2));
+					Graficos.CalculaLinhas();
+				}
+				
+				objTipo = document.getElementById("tipo");
+				
+				if(c==0 && f==0){
+					objTipo.innerHTML="Oscilação simples";
+					Equacao.montaValoresEquacao('parseFloat(  (p*Math.cos((Math.sqrt(k)/Math.sqrt(m))*x)) + ((v*Math.sqrt(m)/Math.sqrt(k))*Math.sin((Math.sqrt(k)/Math.sqrt(m))*x))  )',l_min,l_max);
+				}else if(c!=0 && f==0){
+					if(s2>w02){
+						objTipo.innerHTML="Super-amortecido";
+						Equacao.montaValoresEquacao('((v+(s+(p*(Math.sqrt(s2-w02))))/(2*Math.sqrt(s2-w02)))*Math.pow($e,((-s+(Math.sqrt(s2-w02)))*x)))   +   ((p-((v+(s+(p*(Math.sqrt(s2-w02))))/(2*Math.sqrt(s2-w02)))))*Math.pow($e,(-s+(Math.sqrt(s2-w02)))*x))',l_min,l_max);
+					}else if(s2==w02){
+						objTipo.innerHTML="Criticamente amortecido";
+						Equacao.montaValoresEquacao('parseFloat(p*Math.pow($e,(-s*x)) +(parseFloat(v)+(p*s))*x*Math.pow($e,(-s*x)))',l_min,l_max);
+					}else{
+						objTipo.innerHTML="Sub-amortecido";
+						Equacao.montaValoresEquacao('parseFloat(p*Math.cos(Math.sqrt(w02-s2)*x)*Math.pow($e,-s*x) - (v/(s*Math.sqrt(w02-s2)))*Math.sin(Math.sqrt(w02-s2)*x)*Math.pow($e,-s*x))',l_min,l_max);
+					}
+				}else if(c==0 && f!=0){
+					objTipo.innerHTML="Não amortecido mas com força";
+					var delta = (c2-(4*m*k));
+					if(delta<0){
+						w0 = Math.abs(Math.sqrt(Math.abs(delta))/(2*m));
+						w02 = w0*w0;
+						if(w==w0){
+							objTipo.innerHTML="Ressonância";
+							Equacao.montaValoresEquacao('parseFloat (p*Math.pow($e,(-c/(2*m)))*Math.cos(w*x) + ((((-p*c)/(2*m))-v)/(w0))*Math.sin(w*x)  +  ((f*x)/(2*m*w0))*Math.sin(w*x))',l_min,l_max);
+						}else{
+							objTipo.innerHTML="Batimento";
+							Equacao.montaValoresEquacao('parseFloat((p-((f/((c2*w2)+m2*((k/m)-w2)))*((k/m)-w2)))*Math.pow($e,(-c/(2*m)))*Math.cos(w0*x)+(v/w0)+((c*p)/(2*m*w0))+((f/((c2*w2)+m2*((k/m)-w2)))*((c/2*m)*((k/m)-w2))-(c*w2))*Math.pow($e,(-c/(2*m)))*Math.sin(w0*x)+((f/((c2*w2)+m2*((k/m)-w2)))*((k/m)-w2))*Math.cos(w*x) + ((f/((c2*w2)+m2*((k/m)-w2))))*c*w*Math.sin(w*x))',l_min,l_max);
+						}
+					}else{
+						
+					}
+				}else{
+					objTipo.innerHTML="Amortecido e forçado";
+					var delta = (c2-(4*m*k));
+					if(delta < 0){
+						w0 = Math.abs(Math.sqrt(Math.abs(delta))/(2*m));
+						w02 = w0*w0;
+						if(w==w0){
+							objTipo.innerHTML="Ressonância";
+							Equacao.montaValoresEquacao('parseFloat (p*Math.pow($e,(-c/(2*m)))*Math.cos(w*x) + ((((-p*c)/(2*m))-v)/(w))*Math.sin(w*x)  +  ((f*x)/(2*m*w))*Math.sin(w*x))',l_min,l_max);
+						}else{
+							objTipo.innerHTML="Batimento";
+							Equacao.montaValoresEquacao('parseFloat((p-((f/((c2*w2)+m2*((k/m)-w2)))*((k/m)-w2)))*Math.pow($e,(-c/(2*m)))*Math.cos(w0*x)+(v/w0)+((c*p)/(2*m*w0))+((f/((c2*w2)+m2*((k/m)-w2)))*((c/2*m)*((k/m)-w2))-(c*w2))*Math.pow($e,(-c/(2*m)))*Math.sin(w0*x)+((f/((c2*w2)+m2*((k/m)-w2)))*((k/m)-w2))*Math.cos(w*x) + ((f/((c2*w2)+m2*((k/m)-w2))))*c*w*Math.sin(w*x))',l_min,l_max);
+						}
+					}else if(delta>0){
+						//Equacao.montaValoresEquacao('parseFloat((p-((f/((c2*w2)+m2*((k/m)-w2)))*((k/m)-w2)))*Math.pow($e,(-c/(2*m)))*Math.cos(w0*x)+(v/w0)+((c*p)/(2*m*w0))+((f/((c2*w2)+m2*((k/m)-w2)))*((c/2*m)*((k/m)-w2))-(c*w2))*Math.pow($e,(-c/(2*m)))*Math.sin(w0*x)+((f/((c2*w2)+m2*((k/m)-w2)))*((k/m)-w2))*Math.cos(w*x) + ((f/((c2*w2)+m2*((k/m)-w2))))*c*w*Math.sin(w*x))',l_min,l_max);
+					}else{
+						//Equacao.montaValoresEquacao('parseFloat((p-((f/((c2*w2)+m2*((k/m)-w2)))*((k/m)-w2)))*Math.pow($e,(-c/(2*m)))*Math.cos(w0*x)+(v/w0)+((c*p)/(2*m*w0))+((f/((c2*w2)+m2*((k/m)-w2)))*((c/2*m)*((k/m)-w2))-(c*w2))*Math.pow($e,(-c/(2*m)))*Math.sin(w0*x)+((f/((c2*w2)+m2*((k/m)-w2)))*((k/m)-w2))*Math.cos(w*x) + ((f/((c2*w2)+m2*((k/m)-w2))))*c*w*Math.sin(w*x))',l_min,l_max);
+					}
+				}
+				Graficos.MostraBorda();
+				Graficos.MontaGrafico();
+				Equacao.defineEscalaVertical(2);
+				Equacao.defineEscalaHorizontal(1);
+			}
+		</script>
+		<style>
+			fieldset{color:#000; font: bold 11px arial}
+			span{margin-right:50px; float:left; height:28px; line-height:28px;}
+			#tabelaCentral{position:absolute; left:50%; margin-left:-525px; top:30px;}
+			.label{width:90px;}
+			.campo{width:70px;}
+		</style>
+	</head>
+	<body onload="Inicia()">
+		<table style="width:1050px" id="tabelaCentral">
+			<tr style="height:570px">
+				<td>
+					<fieldset style="float:right; border:1px dashed #000;padding:20px 0px 0px 20px;">
+					<legend style="font: bold 11px arial">Animação</legend>
+						<canvas id="animacao" style="width:210px;height:520px;">Seu navegador não tem suporte a HTML5</canvas>
+					</fieldset>
+				</td>
+				<td>
+					<fieldset style="float:right; border:1px dashed #000;padding:20px 0px 0px 20px;">
+					<legend style="font: bold 11px arial">Gráfico</legend>
+						<canvas id="grafico" style="width:780px;height:520px;">Seu navegador não tem suporte a HTML5</canvas>
+					</fieldset>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<fieldset style="float:right; border:1px dashed #000;padding:0px 0px 0px 20px;width:1030px;">
+					<legend style="font: bold 11px arial">Parâmetros da equação</legend>
+						<span class="label">Massa: </span><span class="campo"><input type="text" id="massa" value='10' style="width:30px"> Kg</span>
+						<span class="label">Mola: </span><span class="campo"><input type="text" id="mola" value='2' style="width:30px"> N/m</span>
+						<span class="label">Amortecimento: </span><span class="campo"><input type="text" value='1' id="amortecimento" style="width:30px"> Ns/m</span>
+						<span class="label" style="float:right;font-size:15px; width:150px; color:red" id="tipo"></span><br clear="all">
+						<span class="label">Posição Ini.: </span><span class="campo"><input type="text" value='10' id="posIni" style="width:30px"> m</span>
+						<span class="label">Velocidade Ini.: </span><span class="campo"><input type="text" value='0' id="velIni" style="width:30px"> m/s</span>
+						<span class="label">Forca: </span><span class="campo" style="width:120px;"><input type="text" value='0' id="forca" style="width:30px"> cos(<input type="text" value='0' id="omegaZero" style="width:30px">*t) N</span><br clear="all">
+						<span class="label">Limites: </span><span class="campo" style="margin:0px;width:120px;"><input type="text" id="l_min" style="width:30px" value='0'> até <input type="text" id="l_max" style="width:30px" value='100'></span>
+						<span class="label">Precisão: </span><span class="campo"><input type="text" id="prec" style="width:30px" value='1000'></span>
+						<input value="Iniciar" style="width: 100px; height: 22px; float:right; margin-right: 50px;" onclick="this.style.display='none'; document.getElementById('retornar').style.display=''; FuncaoReal()" type="button">
+						<input value="Retornar" style="width: 100px; height: 22px; float:right; margin-right: 50px; display:none;" onclick="window.location = window.location; " id='retornar' type="button">
+					</fieldset>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>
